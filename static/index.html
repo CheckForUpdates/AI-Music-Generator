@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Music Generator with Song Extension</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 2rem;
+        }
+        .container {
+            max-width: 800px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .btn-primary {
+            background-color: #6c5ce7;
+            border-color: #6c5ce7;
+        }
+        .btn-primary:hover {
+            background-color: #5b4cdb;
+            border-color: #5b4cdb;
+        }
+        .audio-player {
+            width: 100%;
+            margin-top: 1rem;
+        }
+        .result-section {
+            display: none;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #dee2e6;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 1rem;
+        }
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+        .advanced-options {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #dee2e6;
+        }
+        .form-check {
+            margin-bottom: 0.5rem;
+        }
+        .tooltip-icon {
+            cursor: help;
+            color: #6c757d;
+            margin-left: 0.25rem;
+        }
+        .tab-content {
+            padding-top: 1.5rem;
+        }
+        .nav-tabs {
+            margin-bottom: 0;
+        }
+        .file-upload-container {
+            border: 2px dashed #dee2e6;
+            border-radius: 5px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .file-upload-container:hover {
+            border-color: #6c5ce7;
+        }
+        .file-upload-container.dragover {
+            background-color: rgba(108, 92, 231, 0.1);
+            border-color: #6c5ce7;
+        }
+        .upload-icon {
+            font-size: 2rem;
+            color: #6c5ce7;
+            margin-bottom: 1rem;
+        }
+        .or-divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 2rem 0;
+        }
+        .or-divider::before, .or-divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .or-divider span {
+            padding: 0 1rem;
+            color: #6c757d;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>AI Music Generator</h1>
+            <p class="lead">Generate AI music and extend it into full songs</p>
+        </div>
+        
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="generate-tab" data-bs-toggle="tab" data-bs-target="#generate" type="button" role="tab" aria-controls="generate" aria-selected="true">Generate Music</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload" type="button" role="tab" aria-controls="upload" aria-selected="false">Upload & Extend</button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="myTabContent">
+            <!-- Generate Music Tab -->
+            <div class="tab-pane fade show active" id="generate" role="tabpanel" aria-labelledby="generate-tab">
+                <form id="musicForm">
+                    <div class="form-group">
+                        <label for="prompt">Music Description:</label>
+                        <textarea class="form-control" id="prompt" rows="3" placeholder="Describe the music you want to generate including genre (e.g., A cheerful pop song with piano and drums)" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="duration">Initial Clip Duration (seconds):</label>
+                        <input type="number" class="form-control" id="duration" value="20" min="5" max="30">
+                    </div>
+                    
+                    <div class="form-check form-group">
+                        <input class="form-check-input" type="checkbox" id="extendToFullSong">
+                        <label class="form-check-label" for="extendToFullSong">
+                            Extend to Full Song
+                        </label>
+                    </div>
+                    
+                    <div id="extendOptions" style="display: none;">
+                        <div class="form-group">
+                            <label for="targetDuration">Target Duration (seconds):</label>
+                            <input type="number" class="form-control" id="targetDuration" value="180" min="60" max="300">
+                        </div>
+                        
+                        <div class="advanced-options">
+                            <p><strong>Advanced Options</strong></p>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="lowResourceMode" checked>
+                                <label class="form-check-label" for="lowResourceMode">
+                                    Low Resource Mode
+                                    <span class="tooltip-icon" title="Enable for systems with limited GPU memory (6GB or less). Disables some advanced features but reduces memory usage.">ⓘ</span>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="regenerateContent">
+                                <label class="form-check-label" for="regenerateContent">
+                                    Generate New Content
+                                    <span class="tooltip-icon" title="Generate new musical content based on the original style to create a more varied and interesting extended song.">ⓘ</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-lg w-100">Generate Music</button>
+                </form>
+            </div>
+            
+            <!-- Upload & Extend Tab -->
+            <div class="tab-pane fade" id="upload" role="tabpanel" aria-labelledby="upload-tab">
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <div class="file-upload-container" id="dropZone">
+                        <div class="upload-icon">📁</div>
+                        <p>Drag & drop your audio file here</p>
+                        <p class="text-muted">or</p>
+                        <input type="file" id="audioFile" class="d-none" accept=".mp3,.wav,.ogg,.flac,.m4a">
+                        <button type="button" class="btn btn-outline-primary" id="browseButton">Browse Files</button>
+                        <p class="text-muted mt-2">Supported formats: MP3, WAV, OGG, FLAC, M4A</p>
+                    </div>
+                    
+                    <div id="fileInfo" class="alert alert-info" style="display: none;">
+                        <p class="mb-0"><strong>Selected file:</strong> <span id="fileName"></span></p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="uploadTargetDuration">Target Duration (seconds):</label>
+                        <input type="number" class="form-control" id="uploadTargetDuration" value="180" min="60" max="300">
+                    </div>
+                    
+                    <div class="advanced-options">
+                        <p><strong>Advanced Options</strong></p>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="uploadLowResourceMode" checked>
+                            <label class="form-check-label" for="uploadLowResourceMode">
+                                Low Resource Mode
+                                <span class="tooltip-icon" title="Enable for systems with limited GPU memory (6GB or less). Disables some advanced features but reduces memory usage.">ⓘ</span>
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="uploadRegenerateContent">
+                            <label class="form-check-label" for="uploadRegenerateContent">
+                                Generate New Content
+                                <span class="tooltip-icon" title="Generate new musical content based on the original style to create a more varied and interesting extended song.">ⓘ</span>
+                            </label>
+                        </div>
+                        <div id="styleDescriptionContainer" style="display: none;" class="mt-3">
+                            <label for="styleDescription">Style Description:</label>
+                            <textarea class="form-control" id="styleDescription" rows="2" placeholder="Describe the style of music (e.g., A jazz song with upbeat tempo featuring piano and saxophone)"></textarea>
+                            <small class="form-text text-muted">Required when generating new content. Describe the style of the uploaded audio.</small>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-lg w-100 mt-3">Extend Audio</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="loading">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2" id="loadingMessage">Generating music... This may take a few minutes.</p>
+        </div>
+        
+        <div class="result-section" id="resultSection">
+            <h3 id="resultTitle">Generated Music</h3>
+            <div id="messageContainer" class="alert alert-success"></div>
+            
+            <div class="mb-3">
+                <label for="audioPlayer" class="form-label">Listen:</label>
+                <audio id="audioPlayer" class="audio-player" controls></audio>
+            </div>
+            
+            <div class="d-grid gap-2">
+                <a id="downloadLink" class="btn btn-success" download>Download MP3</a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate Music Form
+            const musicForm = document.getElementById('musicForm');
+            const extendCheckbox = document.getElementById('extendToFullSong');
+            const extendOptions = document.getElementById('extendOptions');
+            const regenerateContentCheckbox = document.getElementById('regenerateContent');
+            
+            // Upload Form
+            const uploadForm = document.getElementById('uploadForm');
+            const dropZone = document.getElementById('dropZone');
+            const audioFileInput = document.getElementById('audioFile');
+            const browseButton = document.getElementById('browseButton');
+            const fileInfo = document.getElementById('fileInfo');
+            const fileName = document.getElementById('fileName');
+            const uploadRegenerateContentCheckbox = document.getElementById('uploadRegenerateContent');
+            const styleDescriptionContainer = document.getElementById('styleDescriptionContainer');
+            
+            // Shared elements
+            const loading = document.querySelector('.loading');
+            const loadingMessage = document.getElementById('loadingMessage');
+            const resultSection = document.getElementById('resultSection');
+            const resultTitle = document.getElementById('resultTitle');
+            const messageContainer = document.getElementById('messageContainer');
+            const audioPlayer = document.getElementById('audioPlayer');
+            const downloadLink = document.getElementById('downloadLink');
+            
+            // Show/hide extend options
+            extendCheckbox.addEventListener('change', function() {
+                extendOptions.style.display = this.checked ? 'block' : 'none';
+            });
+            
+            // Show/hide style description field
+            uploadRegenerateContentCheckbox.addEventListener('change', function() {
+                styleDescriptionContainer.style.display = this.checked ? 'block' : 'none';
+            });
+            
+            // File upload handling
+            browseButton.addEventListener('click', function() {
+                audioFileInput.click();
+            });
+            
+            audioFileInput.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    showFileInfo(this.files[0]);
+                }
+            });
+            
+            // Drag and drop handling
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
+                dropZone.classList.add('dragover');
+            }
+            
+            function unhighlight() {
+                dropZone.classList.remove('dragover');
+            }
+            
+            dropZone.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                
+                if (files.length > 0) {
+                    audioFileInput.files = files;
+                    showFileInfo(files[0]);
+                }
+            }
+            
+            function showFileInfo(file) {
+                fileName.textContent = file.name;
+                fileInfo.style.display = 'block';
+            }
+            
+            // Initialize tooltips
+            const tooltips = document.querySelectorAll('.tooltip-icon');
+            tooltips.forEach(tooltip => {
+                tooltip.addEventListener('mouseover', function() {
+                    const title = this.getAttribute('title');
+                    this.setAttribute('data-original-title', title);
+                    this.removeAttribute('title');
+                    
+                    // Create tooltip
+                    const tooltipDiv = document.createElement('div');
+                    tooltipDiv.className = 'tooltip-custom';
+                    tooltipDiv.textContent = title;
+                    tooltipDiv.style.position = 'absolute';
+                    tooltipDiv.style.backgroundColor = 'rgba(0,0,0,0.8)';
+                    tooltipDiv.style.color = 'white';
+                    tooltipDiv.style.padding = '5px 10px';
+                    tooltipDiv.style.borderRadius = '4px';
+                    tooltipDiv.style.fontSize = '14px';
+                    tooltipDiv.style.maxWidth = '200px';
+                    tooltipDiv.style.zIndex = '1000';
+                    
+                    // Position tooltip
+                    const rect = this.getBoundingClientRect();
+                    tooltipDiv.style.left = rect.left + 'px';
+                    tooltipDiv.style.top = (rect.bottom + 5) + 'px';
+                    
+                    document.body.appendChild(tooltipDiv);
+                    this.tooltipElement = tooltipDiv;
+                });
+                
+                tooltip.addEventListener('mouseout', function() {
+                    if (this.tooltipElement) {
+                        document.body.removeChild(this.tooltipElement);
+                        this.setAttribute('title', this.getAttribute('data-original-title'));
+                        this.removeAttribute('data-original-title');
+                        this.tooltipElement = null;
+                    }
+                });
+            });
+            
+            // Generate Music Form submission
+            musicForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Show loading
+                loading.style.display = 'block';
+                loadingMessage.textContent = 'Generating music... This may take a few minutes.';
+                resultSection.style.display = 'none';
+                
+                // Get form values
+                const prompt = document.getElementById('prompt').value;
+                const duration = parseInt(document.getElementById('duration').value);
+                const extendToFullSong = extendCheckbox.checked;
+                const targetDuration = parseInt(document.getElementById('targetDuration').value);
+                const lowResourceMode = document.getElementById('lowResourceMode').checked;
+                const regenerateContent = document.getElementById('regenerateContent').checked;
+                
+                // Create request payload
+                const payload = {
+                    prompt: prompt,
+                    duration: duration,
+                    extend_to_full_song: extendToFullSong,
+                    target_duration: targetDuration,
+                    low_resource_mode: lowResourceMode,
+                    regenerate_content: regenerateContent
+                };
+                
+                try {
+                    // Send request to generate music
+                    const response = await fetch('/generate_music/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Failed to generate music');
+                    }
+                    
+                    const result = await response.json();
+                    
+                    // Set message
+                    messageContainer.textContent = result.message;
+                    messageContainer.className = 'alert alert-success';
+                    
+                    // Set audio source and download link
+                    if (extendToFullSong) {
+                        audioPlayer.src = '/download_extended_music/';
+                        downloadLink.href = '/download_extended_music/';
+                        resultTitle.textContent = 'Extended Music';
+                    } else {
+                        audioPlayer.src = '/download_music/';
+                        downloadLink.href = '/download_music/';
+                        resultTitle.textContent = 'Generated Music';
+                    }
+                    
+                    // Show result section
+                    resultSection.style.display = 'block';
+                } catch (error) {
+                    messageContainer.textContent = 'Error: ' + error.message;
+                    messageContainer.className = 'alert alert-danger';
+                    resultSection.style.display = 'block';
+                } finally {
+                    loading.style.display = 'none';
+                }
+            });
+            
+            // Upload Form submission
+            uploadForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                if (!audioFileInput.files || audioFileInput.files.length === 0) {
+                    alert('Please select an audio file to upload');
+                    return;
+                }
+                
+                const regenerateContent = uploadRegenerateContentCheckbox.checked;
+                const styleDescription = document.getElementById('styleDescription').value;
+                
+                // Validate style description if regeneration is enabled
+                if (regenerateContent && !styleDescription.trim()) {
+                    alert('Please provide a style description when generating new content');
+                    return;
+                }
+                
+                // Show loading
+                loading.style.display = 'block';
+                loadingMessage.textContent = regenerateContent ? 
+                    'Extending audio with new content generation... This may take several minutes.' : 
+                    'Extending audio... This may take a few minutes.';
+                resultSection.style.display = 'none';
+                
+                // Get form values
+                const file = audioFileInput.files[0];
+                const targetDuration = parseInt(document.getElementById('uploadTargetDuration').value);
+                const lowResourceMode = document.getElementById('uploadLowResourceMode').checked;
+                
+                // Create form data
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('target_duration', targetDuration);
+                formData.append('low_resource_mode', lowResourceMode);
+                formData.append('regenerate_content', regenerateContent);
+                if (regenerateContent) {
+                    formData.append('style_description', styleDescription);
+                }
+                
+                try {
+                    // Send request to extend uploaded audio
+                    const response = await fetch('/extend_uploaded_audio/', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Failed to extend audio');
+                    }
+                    
+                    const result = await response.json();
+                    
+                    // Set message
+                    messageContainer.textContent = result.message;
+                    
+                    if (result.message.includes('failed') || result.message.includes('Failed')) {
+                        messageContainer.className = 'alert alert-warning';
+                    } else {
+                        messageContainer.className = 'alert alert-success';
+                    }
+                    
+                    // Set audio source and download link
+                    audioPlayer.src = '/download_extended_music/';
+                    downloadLink.href = '/download_extended_music/';
+                    resultTitle.textContent = 'Extended Audio';
+                    
+                    // Show result section
+                    resultSection.style.display = 'block';
+                } catch (error) {
+                    messageContainer.textContent = 'Error: ' + error.message;
+                    messageContainer.className = 'alert alert-danger';
+                    resultSection.style.display = 'block';
+                } finally {
+                    loading.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

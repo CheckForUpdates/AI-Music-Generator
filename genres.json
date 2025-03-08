@@ -1,0 +1,33 @@
+{
+    "Genres": {
+      "Orchestral": {
+        "Description": "Classical-inspired music with rich instrumentation, often used in film scores and epic compositions.",
+        "Typical BPM": [60, 180],
+        "Time Signatures": ["4/4", "6/8", "3/4"],
+        "Instruments": ["Strings", "Brass", "Woodwinds", "Percussion", "Choir"],
+        "Mood Keywords": ["Epic", "Dramatic", "Emotional", "Majestic"]
+      },
+      "Synthwave": {
+        "Description": "A retro-futuristic genre influenced by 80s synth music, often used in cyberpunk settings.",
+        "Typical BPM": [80, 130],
+        "Time Signatures": ["4/4"],
+        "Instruments": ["Synth Bass", "Pads", "Electric Drums", "Arpeggiators"],
+        "Mood Keywords": ["Dreamy", "Neon-lit", "Futuristic", "Dark"]
+      },
+      "Jazz": {
+        "Description": "A genre known for improvisation, swing rhythms, and complex chord progressions.",
+        "Typical BPM": [90, 160],
+        "Time Signatures": ["4/4", "3/4"],
+        "Instruments": ["Saxophone", "Double Bass", "Piano", "Drums"],
+        "Mood Keywords": ["Relaxed", "Playful", "Sophisticated", "Expressive"]
+      },
+      "Industrial Metal": {
+        "Description": "A fusion of metal and electronic music with heavy distortion and mechanical rhythms.",
+        "Typical BPM": [120, 180],
+        "Time Signatures": ["4/4"],
+        "Instruments": ["Electric Guitar", "Synth Bass", "Drums", "Metallic Percussion"],
+        "Mood Keywords": ["Aggressive", "Mechanical", "Dark", "Energetic"]
+      }
+    }
+  }
+  
